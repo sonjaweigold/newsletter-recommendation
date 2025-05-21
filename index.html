@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendation Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .user-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .explanation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .recommendation-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .recommendation-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .recommendation-item.clicked {
+            background-color: #f0f8ff;
+            transform: scale(0.98);
+        }
+        
+        .recommendation-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .recommendation-info {
+            padding: 15px;
+        }
+        
+        .recommendation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-link {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .recommendation-link:hover {
+            text-decoration: underline;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section user-section">
+            <h1>User</h1>
+            <div class="input-group">
+                <input type="text" id="userInput" placeholder="Enter username...">
+                <button id="createRecommendationsBtn">Create Recommendations</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h1>Recommendations</h1>
+            <div id="recommendationsContainer">
+                <div class="empty-state">
+                    Enter a username and click "Create Recommendations" to get personalized suggestions.
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h1>Why these Recommendations</h1>
+            <div id="explanationContainer" class="explanation">
+                <div class="empty-state">
+                    Enter a username to see personalized explanation.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+            const userInput = document.getElementById('userInput');
+            const createRecommendationsBtn = document.getElementById('createRecommendationsBtn');
+            const recommendationsContainer = document.getElementById('recommendationsContainer');
+            const explanationContainer = document.getElementById('explanationContainer');
+            
+            // Sample response data structure with explanation
+            const sampleResponse = {
+                explanation: "Based on your interests in news and current events, we've selected newsletters that cover diverse topics from family life to culinary experiences.",
+                recommendations: [
+                  {
+                    "id": "akademie",
+                    "title": "ZEIT Akademie Newsletter"
+                  },
+                  {
+                    "id": "alles-gesagt",
+                    "title": "Der \"Alles gesagt?\"-Newsletter"
+                  },
+                  {
+                    "id": "arbeit",
+                    "title": "Endlich Montag"
+                  },
+                  {
+                    "id": "beziehungsweise",
+                    "title": "Beziehungsweise"
+                  },
+                  {
+                    "id": "campus",
+                    "title": "ZEIT CAMPUS-Newsletter"
+                  },
+                  {
+                    "id": "elbvertiefung",
+                    "title": "Elbvertiefung – Der tägliche Newsletter für Hamburg"
+                  },
+                  {
+                    "id": "familienzeit",
+                    "title": "Familienzeit"
+                  },
+                  {
+                    "id": "geld",
+                    "title": "Der Geld-Newsletter"
+                  },
+                  {
+                    "id": "gemischter-satz",
+                    "title": "Gemischter Satz – der Newsletter der ZEIT Österreich"
+                  },
+                  {
+                    "id": "gesundheit-freunde",
+                    "title": "Das tut mir gut – Die Gesundheitscommunity der ZEIT"
+                  },
+                  {
+                    "id": "groschenoper",
+                    "title": "Die Groschenoper"
+                  },
+                  {
+                    "id": "ki",
+                    "title": "Natürlich intelligent"
+                  },
+                  {
+                    "id": "kultur",
+                    "title": "ZEIT ONLINE – Kultur"
+                  },
+                  {
+                    "id": "literatur",
+                    "title": "Was wir lesen – Der ZEIT-Literaturnewsletter"
+                  },
+                  {
+                    "id": "optimist",
+                    "title": "Der Optimist"
+                  },
+                  {
+                    "id": "power-of-good-bye",
+                    "title": "The Power of Goodbye"
+                  },
+                  {
+                    "id": "quiz",
+                    "title": "Quiz – der tägliche Wissenstest"
+                  },
+                  {
+                    "id": "reise-freunde",
+                    "title": "Kommst Du mit? – Die Reisecommunity der ZEIT"
+                  },
+                  {
+                    "id": "sinn",
+                    "title": "Wofür leben wir? – Der Sinn-Newsletter"
+                  },
+                  {
+                    "id": "ueber-all",
+                    "title": "Über All"
+                  },
+                  {
+                    "id": "verbrechen",
+                    "title": "ZEIT-Verbrechen-Newsletter"
+                  },
+                  {
+                    "id": "was-fuer-ein-tag",
+                    "title": "\"Was für ein Tag\" – der ZEIT-Newsletter"
+                  },
+                  {
+                    "id": "was-jetzt",
+                    "title": "Was jetzt? – Der tägliche Morgenüberblick"
+                  },
+                  {
+                    "id": "weltkunst-zeitz",
+                    "title": "Weltkunst-Newsletter von Lisa Zeitz"
+                  },
+                  {
+                    "id": "wie-wars-in-der-schule",
+                    "title": "Die Lehrer-Kolumne"
+                  },
+                  {
+                    "id": "wissen3",
+                    "title": "ZEIT WISSEN³ – Neues aus Hochschule, Wissenschaftspolitik und Scientific Community"
+                  },
+                  {
+                    "id": "wochenende-standard",
+                    "title": "ZEIT am Wochenende"
+                  },
+                  {
+                    "id": "wochenmarkt",
+                    "title": "Wochenmarkt-Newsletter"
+                  }
+                ]
+            };
+            
+            // Setup form submission
+            createRecommendationsBtn.addEventListener('click', generateRecommendations);
+            
+            // Enter key to submit
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    generateRecommendations();
+                }
+            });
+            
+            // Show sample recommendations on initial load (for testing only)
+            // Comment these lines for production
+            // displayExplanation(sampleResponse.explanation);
+            // displayRecommendations(sampleResponse.recommendations);
+            
+            function generateRecommendations() {
+                const username = userInput.value.trim();
+                
+                if (username === '') {
+                    alert('Please enter a username!');
+                    return;
+                }
+                
+                // Show loading state
+                recommendationsContainer.innerHTML = '<div class="empty-state">Loading recommendations...</div>';
+                explanationContainer.innerHTML = '<div class="empty-state">Loading explanation...</div>';
+                
+                // Prepare the request data
+                const requestData = {
+                    username: username
+                };
+                
+                // Send POST request to REST API
+                fetch('https://api.example.com/recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Process and display the received recommendations and explanation
+                    displayExplanation(data.explanation || "No explanation provided.");
+                    displayRecommendations(data.recommendations || []);
+                })
+                .catch(error => {
+                    console.error('Error fetching recommendations:', error);
+                    
+                    // For demonstration purposes, fall back to sample data if the API request fails
+                    explanationContainer.innerHTML = '<div class="empty-state">Could not load data. Using sample data instead.</div>';
+                    recommendationsContainer.innerHTML = '<div class="empty-state">Could not load recommendations. Using sample data instead.</div>';
+                    
+                    setTimeout(() => {
+                        displayExplanation(sampleResponse.explanation);
+                        displayRecommendations(sampleResponse.recommendations);
+                    }, 1000);
+                });
+            }
+            
+            function displayExplanation(explanation) {
+                explanationContainer.textContent = explanation;
+            }
+            
+            function displayRecommendations(recommendations) {
+                // Clear container
+                recommendationsContainer.innerHTML = '';
+                
+                if (!recommendations || recommendations.length === 0) {
+                    recommendationsContainer.innerHTML = '<div class="empty-state">No recommendations found for this user.</div>';
+                    return;
+                }
+                
+                // Create recommendations grid
+                const grid = document.createElement('div');
+                grid.className = 'recommendations';
+                
+                // Display up to 20 recommendations
+                recommendations.slice(0, 20).forEach(item => {
+                    const recommendationElement = createRecommendationElement(item);
+                    grid.appendChild(recommendationElement);
+                });
+                
+                recommendationsContainer.appendChild(grid);
+            }
+            
+            function createRecommendationElement(item) {
+                const element = document.createElement('div');
+                element.className = 'recommendation-item';
+                element.dataset.id = item.id || '';
+                
+                const image = document.createElement('img');
+                image.className = 'recommendation-image';
+                
+                // Build the image URL based on the item ID
+                if (item.id) {
+                    image.src = `images/${item.id}.jpg`;
+                } else {
+                    image.src = '/api/placeholder/200/200';
+                }
+                
+                image.alt = item.title || 'Recommendation';
+                image.onerror = function() {
+                    // Fallback if image doesn't load
+                    this.src = '/api/placeholder/200/200';
+                    console.warn(`Image not found for ID: ${item.id}`);
+                };
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'recommendation-info';
+                
+                const title = document.createElement('div');
+                title.className = 'recommendation-title';
+                title.textContent = item.title || 'Unknown Title';
+                
+                infoDiv.appendChild(title);
+                
+                element.appendChild(image);
+                element.appendChild(infoDiv);
+                
+                // Make the entire card clickable
+                element.addEventListener('click', function() {
+                    // You can handle click events based on the recommendation ID
+                    console.log(`Recommendation clicked: ${item.id}`);
+                    
+                    // Optional: Add some visual feedback
+                    element.classList.add('clicked');
+                    setTimeout(() => {
+                        element.classList.remove('clicked');
+                    }, 200);
+                });
+                
+                return element;
+            }
+        });
+    </script>
+</body>
+</html>

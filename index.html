@@ -18,19 +18,21 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 15px;
         }
         
         .section {
             background-color: white;
             border-radius: 8px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         h1 {
             color: #2c3e50;
             margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 20px;
         }
         
         .user-section {
@@ -42,10 +44,11 @@
         .input-group {
             display: flex;
             gap: 10px;
+            width: 480px;
         }
         
         input {
-            flex-grow: 1;
+            width: 190px;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -53,6 +56,7 @@
         }
         
         button {
+            flex-grow: 1;
             background-color: #3498db;
             color: white;
             border: none;
@@ -390,13 +394,13 @@
                 if (item.id) {
                     image.src = `images/${item.id}.jpg`;
                 } else {
-                    image.src = '/api/placeholder/200/200';
+                    image.src = 'images/placeholder.jpg';
                 }
                 
                 image.alt = item.title || 'Recommendation';
                 image.onerror = function() {
                     // Fallback if image doesn't load
-                    this.src = '/api/placeholder/200/200';
+                    this.src = 'images/placeholder.jpg';
                     console.warn(`Image not found for ID: ${item.id}`);
                 };
                 
